@@ -1,15 +1,42 @@
 package main
 
 import (
-	"go-worker/handler"
+	"context"
+	"go-worker/client"
+	"go-worker/model"
+	"go-worker/tracer"
+	"log"
+	"os"
+	"os/signal"
 
-	"github.com/labstack/echo/v4"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func main() {
 
-	server := echo.New()
-	handler.RegisterRoutes(server)
-	server.Logger.Fatal(server.Start(":8080"))
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
 
+	shutDown, err := tracer.InitTrace()
+	if err != nil {
+		log.Panic(err)
+	}
+
+	tr := otel.GetTracerProvider().Tracer("go-worker/main")
+	ctx, span := tr.Start(ctx, "main", trace.WithSpanKind(trace.SpanKindServer))
+
+	defer tracer.RunShutdown(shutDown, ctx)
+	defer span.End()
+
+	viaCepAddress, err := client.SearchViaCepZipCode("01001000", ctx)
+	if err != nil {
+		return
+	}
+
+	viaCepAddress.NormalizdZipCode()
+	err = client.CreateNodeApiAddress(model.Address(viaCepAddress), ctx)
+	if err != nil {
+		return
+	}
 }
