@@ -6,16 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"go-worker/log"
+	"go-worker/internal/log"
+	"go-worker/internal/settings"
+	"go-worker/internal/tracer"
 	"go-worker/model"
-	"go-worker/tracer"
 	"io/ioutil"
 	"net/http"
-)
-
-const (
-	_viaCepApiBaseURL = "https://viacep.com.br/ws"
-	_nodeAPIBaseURL   = "http://localhost:8081"
 )
 
 func SearchViaCepZipCode(zipCode string, ctx context.Context) (model.ViaCepAddress, error) {
@@ -24,7 +20,7 @@ func SearchViaCepZipCode(zipCode string, ctx context.Context) (model.ViaCepAddre
 	defer span.End()
 
 	method := "GET"
-	url := fmt.Sprintf("%s/%s/json/", _viaCepApiBaseURL, zipCode)
+	url := fmt.Sprintf("%s/%s/json/", settings.Env.ViaCep.BaseURL, zipCode)
 
 	tracer.HttpRequestSpanAttributes(span, url, method, "")
 	response, err := http.Get(url)
@@ -62,7 +58,7 @@ func CreateNodeApiAddress(address model.Address, ctx context.Context) error {
 	defer span.End()
 
 	method := "POST"
-	url := fmt.Sprintf("%s/address/", _nodeAPIBaseURL)
+	url := fmt.Sprintf("%s/address/", settings.Env.NodeAPI.BaseURL)
 	body, err := json.Marshal(address)
 
 	if err != nil {

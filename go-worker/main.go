@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"go-worker/client"
+	"go-worker/internal/tracer"
 	"go-worker/model"
-	"go-worker/tracer"
 	"log"
 	"os"
 	"os/signal"
