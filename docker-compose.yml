@@ -19,3 +19,17 @@ services:
     ports:
       - "5432:5432"
     restart: unless-stopped
+
+  localstack:
+    container_name: localstack_main
+    image: localstack/localstack:0.12.17
+    ports:
+      - 4566:4566
+      - 4565:4565
+      - 4571:4571
+      - 4576:4576
+      - 4575:4575
+    environment:
+      - SERVICES=sns,sqs,s3
+    volumes:
+      - "./localstack.sh:/docker-entrypoint-initaws.d/ses.sh"
