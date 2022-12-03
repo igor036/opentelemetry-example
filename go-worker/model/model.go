@@ -2,6 +2,14 @@ package model
 
 import "strings"
 
+type SQSMessage struct {
+	Message string `json:"Message"`
+}
+
+type SQSImportZipcodeAddress struct {
+	ZipCode string `json:"zipCode"`
+}
+
 type Address struct {
 	ZipCode  string `json:"zipCode"`
 	Address  string `json:"address"`

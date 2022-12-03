@@ -1,10 +1,13 @@
 package listener
 
 import (
+	"encoding/json"
 	"go-worker/internal/settings"
+	"go-worker/model"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
 )
@@ -13,6 +16,18 @@ var (
 	svc            *sqs.SQS
 	sqsMessagePoll chan *sqs.Message
 )
+
+func UnmarshalSQSMessage(message *sqs.Message) model.SQSMessage {
+
+	var sqsMessage model.SQSMessage
+	body := message.Body
+
+	if err := json.Unmarshal([]byte(*body), &sqsMessage); err != nil {
+		panic(err)
+	}
+
+	return sqsMessage
+}
 
 func DispatchMessage(timeout int64, queueName string, HandlerSQSMessage func(message *sqs.Message)) {
 
@@ -26,27 +41,30 @@ func DispatchMessage(timeout int64, queueName string, HandlerSQSMessage func(mes
 
 func ReciverSQSMessages(timeout int64, queueName string) {
 
-	queueURL := sqsQueueURL(&queueName).QueueUrl
-	visibilityTimeout := sqsVisibilityTimout(timeout)
+	for {
 
-	result, err := svc.ReceiveMessage(&sqs.ReceiveMessageInput{
-		AttributeNames: []*string{
-			aws.String(sqs.MessageSystemAttributeNameSentTimestamp),
-		},
-		MessageAttributeNames: []*string{
-			aws.String(sqs.QueueAttributeNameAll),
-		},
-		QueueUrl:            queueURL,
-		MaxNumberOfMessages: aws.Int64(settings.Env.SQS.MaxNumberOfMessages),
-		VisibilityTimeout:   aws.Int64(visibilityTimeout),
-	})
+		queueURL := sqsQueueURL(&queueName).QueueUrl
+		visibilityTimeout := sqsVisibilityTimout(timeout)
 
-	if err != nil {
-		panic(err)
-	}
+		result, err := svc.ReceiveMessage(&sqs.ReceiveMessageInput{
+			AttributeNames: []*string{
+				aws.String(sqs.MessageSystemAttributeNameSentTimestamp),
+			},
+			MessageAttributeNames: []*string{
+				aws.String(sqs.QueueAttributeNameAll),
+			},
+			QueueUrl:            queueURL,
+			MaxNumberOfMessages: aws.Int64(settings.Env.SQS.MaxNumberOfMessages),
+			VisibilityTimeout:   aws.Int64(visibilityTimeout),
+		})
 
-	for _, message := range result.Messages {
-		sqsMessagePoll <- message
+		if err != nil {
+			panic(err)
+		}
+
+		for _, message := range result.Messages {
+			sqsMessagePoll <- message
+		}
 	}
 }
 
@@ -65,9 +83,24 @@ func DeleteSQSMessage(queueName string, message *sqs.Message) {
 }
 
 func awsSession() *session.Session {
-	return session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
+
+	sess, err := session.NewSessionWithOptions(
+		session.Options{
+			Config: aws.Config{
+				Credentials:      credentials.NewStaticCredentials(settings.Env.SQS.AWSAccessKeyId, settings.Env.SQS.AWSSecretAccessKey, ""),
+				Region:           aws.String(settings.Env.SQS.AWSRegion),
+				Endpoint:         aws.String(settings.Env.SQS.AWSAddress),
+				S3ForcePathStyle: aws.Bool(true),
+			},
+			Profile: settings.Env.SQS.AWSProfile,
+		},
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return sess
 }
 
 func sqsQueueURL(queueName *string) *sqs.GetQueueUrlOutput {

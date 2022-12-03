@@ -14,7 +14,13 @@ type enviroment struct {
 		BaseURL string `env:"NODE_API_BASE_URL"`
 	}
 	SQS struct {
-		MaxNumberOfMessages int64 `env:"SQS_MAX_MESSAGES"`
+		MaxNumberOfMessages int64  `env:"SQS_MAX_MESSAGES"`
+		AWSRegion           string `env:"AWS_REGION"`
+		AWSAccessKeyId      string `env:"AWS_ACCESS_KEY_ID"`
+		AWSSecretAccessKey  string `env:"AWS_SECRET_ACCESS_KEY"`
+		AWSAddress          string `env:"AWS_ADDRESS"`
+		AWSProfile          string `env:"AWS_PROFILE"`
+		ImportZipCodeQueue  string `env:"IMPORT_ZIP_CODE_QUEUE"`
 	}
 }
 

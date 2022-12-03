@@ -52,23 +52,27 @@ func RunShutdown(shutdown func(context.Context) error, context context.Context) 
 	}
 }
 
+func ZipCodeSpanAttribute(span trace.Span, zipCode string) {
+	span.SetAttributes(attribute.String("zip_code", zipCode))
+}
+
 func HttpRequestSpanAttributes(span trace.Span, url, method, requestBody string) {
 	span.SetAttributes(
 		attribute.String("url", url),
 		attribute.String("method", method),
-		attribute.String("Request body", requestBody),
+		attribute.String("request_body", requestBody),
 	)
 }
 
 func HttResponseSpanAttributes(span trace.Span, responseBody string, statusCode int) {
 	span.SetAttributes(
-		attribute.String("Response body", responseBody),
-		attribute.Int("Response Status Code", statusCode),
+		attribute.String("response_body", responseBody),
+		attribute.Int("response_status_Code", statusCode),
 	)
 }
 
 func HttErrorSpanAttributes(span trace.Span, err error) {
 	span.SetAttributes(
-		attribute.String("Error", err.Error()),
+		attribute.String("error", err.Error()),
 	)
 }

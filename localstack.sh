@@ -10,11 +10,11 @@ echo "configure region [us-west-2]"
 aws configure set default.region us-west-2
 
 echo "configure sns topic"
-TOPIC_NAME="import_address"
+TOPIC_NAME="import-zipcode-address"
 TOPIC_ARN=$(aws --endpoint-url http://localhost:4566 sns create-topic --output text --name "$TOPIC_NAME")
 
 echo "configure sqs queue"
-QUEUE_NAME="import_address"
+QUEUE_NAME="import-zipcode-address"
 QUEUE_URL=$(aws --endpoint-url http://localhost:4566 sqs create-queue --queue-name "$QUEUE_NAME" --output text)
 QUEUE_ARN=$(aws --endpoint-url http://localhost:4566 sqs get-queue-attributes --queue-url "$QUEUE_URL" | jq -r ".Attributes.QueueArn")
 
