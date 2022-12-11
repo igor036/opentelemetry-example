@@ -84,7 +84,8 @@ func ResponseTimeMetric(duration time.Duration, attrs []attribute.KeyValue) {
 		return
 	}
 
-	timer.Record(ctx, duration.Milliseconds(), attrs...)
+	miliseconds := duration.Milliseconds()
+	timer.Record(ctx, miliseconds, attrs...)
 }
 
 func SuccessRequestCountMetric(attrs []attribute.KeyValue) {

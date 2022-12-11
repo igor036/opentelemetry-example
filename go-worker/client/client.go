@@ -45,9 +45,9 @@ func SearchViaCepZipCode(zipCode string, ctx context.Context) (model.ViaCepAddre
 	responseBody, _ := ioutil.ReadAll(response.Body)
 	logger := log.HttpResponseLogger(url, method, string(responseBody), response.StatusCode)
 	tracer.HttResponseSpanAttributes(span, string(responseBody), response.StatusCode)
-	metrics.SuccessRequestCountMetric(metricsAttrs)
 
 	if response.StatusCode != http.StatusOK {
+		metrics.ErrorRequestCountMetric(metricsAttrs)
 		err := errors.New(string(responseBody))
 		logger.Error(err)
 		return model.ViaCepAddress{}, err
@@ -59,6 +59,7 @@ func SearchViaCepZipCode(zipCode string, ctx context.Context) (model.ViaCepAddre
 		return model.ViaCepAddress{}, err
 	}
 
+	metrics.SuccessRequestCountMetric(metricsAttrs)
 	return address, nil
 }
 
@@ -96,14 +97,14 @@ func CreateNodeApiAddress(address model.Address, ctx context.Context) error {
 
 	logger := log.HttpResponseLogger(url, method, string(responseBody), response.StatusCode)
 	tracer.HttResponseSpanAttributes(span, string(responseBody), response.StatusCode)
-	metrics.SuccessRequestCountMetric(metricsAttrs)
 
 	if response.StatusCode != http.StatusCreated {
+		metrics.ErrorRequestCountMetric(metricsAttrs)
 		err := errors.New(string(responseBody))
 		logger.Error(err)
 		return err
 	}
 
-	logger.Info()
+	metrics.SuccessRequestCountMetric(metricsAttrs)
 	return nil
 }

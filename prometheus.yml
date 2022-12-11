@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "go-worker-job"
+    metrics_path: "/api/v1/actuator/prometheus"
+    static_configs:
+      - targets: ["localhost:8080"]
+        labels:
+          application: "go-worker"
