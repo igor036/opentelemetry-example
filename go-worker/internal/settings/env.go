@@ -7,11 +7,16 @@ import (
 var Env enviroment
 
 type enviroment struct {
-	ViaCep struct {
+	AppName string `env:"APP_NAME"`
+	ViaCep  struct {
 		BaseURL string `env:"VIA_CEP_BASE_URL"`
 	}
 	NodeAPI struct {
 		BaseURL string `env:"NODE_API_BASE_URL"`
+	}
+	Metrics struct {
+		Port    int64 `env:"METRICS_PORT"`
+		Timeout int64 `env:"METRICS_TIMEOUT#"`
 	}
 	SQS struct {
 		MaxNumberOfMessages int64  `env:"SQS_MAX_MESSAGES"`

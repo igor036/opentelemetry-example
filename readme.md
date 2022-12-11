@@ -1,9 +1,9 @@
 ## Configure aws CLI profile
 
-    aws configure set aws_access_key_id "localstack" --profile localstack
-    aws configure set aws_secret_access_key "localstack" --profile localstack
-    aws configure set region "eu-central-1" --profile localstack
-    aws configure set output "table" --profile test-profile
+    aws configure set aws_access_key_id "localstack"
+    aws configure set aws_secret_access_key "localstack"
+    aws configure set region "us-west-2"
+    aws configure set output "json"
 
 ## Publish SQS message
 
