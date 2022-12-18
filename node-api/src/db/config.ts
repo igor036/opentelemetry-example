@@ -11,3 +11,11 @@ export const AppDataSource: TypeOrmModuleOptions = {
     entities: [Address],
     synchronize: true,
 }
+
+export const AppDatasourceTest: TypeOrmModuleOptions = {
+    type: 'sqlite',
+    database: ':memory:',
+    entities: [Address],
+    logging: false,
+    synchronize: true,
+}
